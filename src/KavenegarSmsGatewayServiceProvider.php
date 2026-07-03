@@ -24,7 +24,7 @@ final class KavenegarSmsGatewayServiceProvider extends PackageServiceProvider
         });
 
         if ($this->app->bound('sms-gateway')) {
-            $this->app->make('sms-gateway')->extend('kavenegar', fn(): KavenegarDriver => $this->app->make(KavenegarDriver::class));
+            $this->app->make('sms-gateway')->extend('kavenegar', fn(Application $app): KavenegarDriver => $app->make(KavenegarDriver::class));
         }
     }
 }
