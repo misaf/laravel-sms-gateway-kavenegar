@@ -21,8 +21,21 @@ SMS_GATEWAY_KAVENEGAR_APIKEY=your-api-key
 // config/services.php
 'kavenegar' => [
     'api_key' => env('SMS_GATEWAY_KAVENEGAR_APIKEY'),
+    'base_url' => env('SMS_GATEWAY_KAVENEGAR_BASE_URL'),
 ],
 ```
+
+By default, the API key is included in the base URL path. If you override `base_url`, include the account-specific path segment expected by Kavenegar.
+
+## Driver Behavior
+
+| Option | Value |
+| --- | --- |
+| Driver name | `kavenegar` |
+| Default base URL | `https://api.kavenegar.com/v1/{api_key}/` |
+| `send()` endpoint | `POST sms/send.json` |
+| Authentication | API key in the base URL path |
+| Payload | Form data sent directly to Kavenegar |
 
 ## Usage
 
@@ -31,7 +44,7 @@ use Misaf\LaravelSmsGateway\Facade\SmsGateway;
 
 $response = SmsGateway::driver('kavenegar')->send([
     'receptor' => '09123456789',
-    'message'  => 'Hello',
+    'message'  => 'Hello from kavenegar',
 ]);
 ```
 
