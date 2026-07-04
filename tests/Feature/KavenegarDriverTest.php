@@ -11,24 +11,40 @@ test('can send request through kavenegar driver', function (): void {
     config()->set('services.kavenegar.api_key', 'test-api-key');
 
     Http::fake([
-        'https://api.kavenegar.com/v1/sms/send.json' => Http::response([
+        'https://api.kavenegar.com/v1/test-api-key/sms/send.json' => Http::response([
             'return' => ['status' => 200, 'message' => 'success'],
         ], 200),
     ]);
 
-    $response = SmsGateway::driver()->request()
-        ->post('sms/send.json', [
-            'receptor' => '09123456789',
-            'message'  => 'Hello from kavenegar',
-        ])
-        ->json();
+    $response = SmsGateway::driver()->send([
+        'receptor' => '09123456789',
+        'message'  => 'Hello from kavenegar',
+    ])->json();
 
     Http::assertSent(function (Request $request): bool {
-        return 'https://api.kavenegar.com/v1/sms/send.json' === $request->url()
-            && $request->hasHeader('apikey', 'test-api-key')
+        return 'https://api.kavenegar.com/v1/test-api-key/sms/send.json' === $request->url()
+            && $request->isForm()
             && '09123456789' === $request['receptor']
             && 'Hello from kavenegar' === $request['message'];
     });
 
     expect($response['return']['status'])->toBe(200);
+});
+
+test('prefers the base URL configured in services over the driver default', function (): void {
+    config()->set('sms_gateway.default', 'kavenegar');
+    config()->set('services.kavenegar.base_url', 'https://services-override.example.test/v1/test-api-key/');
+
+    Http::fake([
+        'https://services-override.example.test/*' => Http::response(['return' => ['status' => 200]], 200),
+    ]);
+
+    SmsGateway::driver()->send([
+        'receptor' => '09123456789',
+        'message'  => 'Hello',
+    ]);
+
+    Http::assertSent(function (Request $request): bool {
+        return 'https://services-override.example.test/v1/test-api-key/sms/send.json' === $request->url();
+    });
 });

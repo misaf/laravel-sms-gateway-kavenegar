@@ -4,22 +4,27 @@ declare(strict_types=1);
 
 namespace Misaf\LaravelSmsGatewayKavenegar\Drivers;
 
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Misaf\LaravelSmsGateway\SmsGatewayDriver;
 
 final class KavenegarDriver extends SmsGatewayDriver
 {
-    protected function driverName(): string
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function send(array $data): Response
     {
-        return 'kavenegar';
+        return $this->request()->post('sms/send.json', $data);
     }
 
-    protected function defaultGateway(): string
+    protected function defaultBaseUrl(): string
     {
-        return 'https://api.kavenegar.com/v1/';
+        return "https://api.kavenegar.com/v1/{$this->driverConfig('api_key')}/";
     }
 
-    protected function apiKeyHeader(): string
+    protected function configureRequest(PendingRequest $request): PendingRequest
     {
-        return 'apikey';
+        return $request->asForm();
     }
 }

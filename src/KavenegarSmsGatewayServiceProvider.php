@@ -5,26 +5,16 @@ declare(strict_types=1);
 namespace Misaf\LaravelSmsGatewayKavenegar;
 
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\ServiceProvider;
 use Misaf\LaravelSmsGateway\SmsGatewayManager;
 use Misaf\LaravelSmsGatewayKavenegar\Drivers\KavenegarDriver;
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-final class KavenegarSmsGatewayServiceProvider extends PackageServiceProvider
+final class KavenegarSmsGatewayServiceProvider extends ServiceProvider
 {
-    public function configurePackage(Package $package): void
+    public function register(): void
     {
-        $package->name('laravel-sms-gateway-kavenegar');
-    }
-
-    public function packageRegistered(): void
-    {
-        $this->app->afterResolving(SmsGatewayManager::class, function (SmsGatewayManager $manager, Application $app): void {
-            $manager->extend('kavenegar', fn(): KavenegarDriver => $app->make(KavenegarDriver::class));
+        $this->callAfterResolving(SmsGatewayManager::class, function (SmsGatewayManager $manager): void {
+            $manager->extend('kavenegar', fn(Application $app): KavenegarDriver => $app->make(KavenegarDriver::class));
         });
-
-        if ($this->app->bound('sms-gateway')) {
-            $this->app->make('sms-gateway')->extend('kavenegar', fn(Application $app): KavenegarDriver => $app->make(KavenegarDriver::class));
-        }
     }
 }
