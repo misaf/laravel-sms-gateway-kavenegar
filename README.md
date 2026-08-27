@@ -14,15 +14,24 @@ Laravel package discovery registers the driver service provider automatically.
 
 ```env
 SMS_GATEWAY_DRIVER=kavenegar
-SMS_GATEWAY_KAVENEGAR_APIKEY=your-api-key
+SMS_GATEWAY_KAVENEGAR_API_KEY=your-api-key
+```
+
+Publish the config file if you want to edit it directly:
+
+```bash
+php artisan vendor:publish --tag=sms-gateway-kavenegar-config
 ```
 
 ```php
-// config/services.php
-'kavenegar' => [
-    'api_key' => env('SMS_GATEWAY_KAVENEGAR_APIKEY'),
+<?php
+
+declare(strict_types=1);
+
+return [
+    'api_key'  => env('SMS_GATEWAY_KAVENEGAR_API_KEY'),
     'base_url' => env('SMS_GATEWAY_KAVENEGAR_BASE_URL'),
-],
+];
 ```
 
 By default, the API key is included in the base URL path. If you override `base_url`, include the account-specific path segment expected by Kavenegar.
@@ -40,11 +49,11 @@ By default, the API key is included in the base URL path. If you override `base_
 ## Usage
 
 ```php
-use Misaf\LaravelSmsGateway\Facade\SmsGateway;
+use Misaf\LaravelSmsGateway\Facades\SmsGateway;
 
 $response = SmsGateway::driver('kavenegar')->send([
     'receptor' => '09123456789',
-    'message'  => 'Hello from kavenegar',
+    'message' => 'Hello from kavenegar',
 ]);
 ```
 
@@ -56,12 +65,13 @@ Use `request()` when you need direct access to Laravel's HTTP client:
 $request = SmsGateway::driver('kavenegar')->request();
 ```
 
-## Testing
+## Development
 
-```bash
-composer test
-composer analyse
-```
+This package is developed in the
+[`misaf/laravel-sms-gateway`](https://github.com/misaf/laravel-sms-gateway)
+monorepo at `src/Drivers/laravel-sms-gateway-kavenegar` and split out here on release. Open issues and
+pull requests against the monorepo; run `composer test` and `composer analyse`
+from its root.
 
 ## License
 

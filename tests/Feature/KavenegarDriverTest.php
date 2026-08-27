@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use Misaf\LaravelSmsGateway\Facade\SmsGateway;
+use Misaf\LaravelSmsGateway\Facades\SmsGateway;
 
 test('can send request through kavenegar driver', function (): void {
-    config()->set('sms_gateway.default', 'kavenegar');
-    config()->set('services.kavenegar.api_key', 'test-api-key');
+    config()->set('laravel-sms-gateway.default', 'kavenegar');
+    config()->set('laravel-sms-gateway-kavenegar.api_key', 'test-api-key');
 
     Http::fake([
         'https://api.kavenegar.com/v1/test-api-key/sms/send.json' => Http::response([
@@ -31,9 +31,9 @@ test('can send request through kavenegar driver', function (): void {
     expect($response['return']['status'])->toBe(200);
 });
 
-test('prefers the base URL configured in services over the driver default', function (): void {
-    config()->set('sms_gateway.default', 'kavenegar');
-    config()->set('services.kavenegar.base_url', 'https://services-override.example.test/v1/test-api-key/');
+test('prefers the base URL configured in the driver config over the driver default', function (): void {
+    config()->set('laravel-sms-gateway.default', 'kavenegar');
+    config()->set('laravel-sms-gateway-kavenegar.base_url', 'https://services-override.example.test/v1/test-api-key/');
 
     Http::fake([
         'https://services-override.example.test/*' => Http::response(['return' => ['status' => 200]], 200),
