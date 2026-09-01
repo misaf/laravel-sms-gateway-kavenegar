@@ -5,11 +5,21 @@ declare(strict_types=1);
 namespace Misaf\LaravelSmsGatewayKavenegar;
 
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\Response;
-use Misaf\LaravelSmsGateway\SmsGatewayDriver;
+use Illuminate\Support\Facades\Http;
+use Misaf\LaravelSmsGateway\Contracts\SmsGateway;
+use Misaf\LaravelSmsGateway\Events\SmsSent;
 
-final class KavenegarDriver extends SmsGatewayDriver
+final class KavenegarDriver implements SmsGateway
 {
+    public function __construct(
+        private readonly string $apiKey = '',
+        private readonly string $baseUrl = '',
+        private readonly int $timeout = 10,
+        private readonly int $connectTimeout = 5,
+    ) {}
+
     /**
      * @param array<string, mixed> $data
      */
@@ -18,13 +28,16 @@ final class KavenegarDriver extends SmsGatewayDriver
         return $this->request()->post('sms/send.json', $data);
     }
 
-    protected function defaultBaseUrl(): string
+    public function request(): PendingRequest
     {
-        return "https://api.kavenegar.com/v1/{$this->driverConfig('api_key')}/";
-    }
+        return Http::baseUrl('' !== $this->baseUrl ? $this->baseUrl : "https://api.kavenegar.com/v1/{$this->apiKey}/")
+            ->timeout($this->timeout)
+            ->connectTimeout($this->connectTimeout)
+            ->asForm()
+            ->afterResponse(function (Response $response, Request $request): Response {
+                SmsSent::dispatch('kavenegar', $request, $response);
 
-    protected function configureRequest(PendingRequest $request): PendingRequest
-    {
-        return $request->asForm();
+                return $response;
+            });
     }
 }

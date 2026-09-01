@@ -1,6 +1,6 @@
 {
     "name": "misaf/laravel-sms-gateway-kavenegar",
-    "description": "Kavenegar SMS gateway driver for Laravel.",
+    "description": "Kavenegar SMS gateway driver for Laravel SMS Gateway.",
     "license": "MIT",
     "type": "library",
     "keywords": [
